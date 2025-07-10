@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+	<Target Name="CopyFileAfterBuild" AfterTargets="Build">
+		<!-- 定义要复制的文件路径 -->
+		<PropertyGroup>
+			<SourceFilePath>$(ProjectDir)bin\x64\Debug\net8.0-windows\*</SourceFilePath>
+			<DestinationFolderPath>$(ProjectDir)..\test\</DestinationFolderPath>
+		</PropertyGroup>
+
+		<!-- 使用Exec任务执行CMD命令 -->
+		<!--<Exec Command="xcopy /E /Y &quot;$(SourceFilePath)&quot; &quot;$(DestinationFolderPath)&quot;" />-->
+	</Target>
+	
+</Project>

@@ -1,0 +1,36 @@
+{
+  "DownloadNum": 5,
+  "Downloads": [
+    {
+      "name": "融合2.7",
+      "links": [
+        "https://123-184-221-26.pd1.cjjd19.com:30443/download-cdn.123295.com/123-411/5d39f0b5/1828542840-0/5d39f0b5f773507e2e045f4c1667e99b/c-m83?v=5&t=1752199701&s=17521997016c56467e7ec8a7f9c6b656f60f84e423&r=DABXGX&bzc=2&bzs=313831393339333039373a38393535343231363a3338323031353337333a31383237393039363735&bzp=0&bi=419216395&filename=%E6%A4%8D%E7%89%A9%E5%A4%A7%E6%88%98%E5%83%B5%E5%B0%B8%E8%9E%8D%E5%90%88%E7%89%882.7%E8%BF%9B%E5%8C%96%E7%89%88%E6%9C%AC.zip&x-mf-biz-cid=ad13e473-d110-49ae-ba31-9d48d29d4f04-6eaa77&cache_type=1&ndcp=1&xmfcid=f8ab48b3-01e7-43ec-aa9e-2ea6155d621b9478eae86e8",
+        ""
+      ],
+      "path": "./.rh/pvzrh27"
+    },
+    {
+      "name": "融合2.6.1",
+      "links": [
+        "https://123-184-221-22.pd1.cjjd19.com:30443/download-cdn.123295.com/123-676/b8b28e02/1830796632-0/b8b28e022d6b943548a5bc304da8dea4/c-m83?v=5&t=1752200462&s=17522004624116da4b82b9db96ba47d24c85ba873e&r=L6YGM1&bzc=2&bzs=313831393339333039373a38393535343231383a3533303931363136363a31383237393039363735&bzp=0&bi=419216395&filename=%E6%A4%8D%E7%89%A9%E5%A4%A7%E6%88%98%E5%83%B5%E5%B0%B8%E8%9E%8D%E5%90%88%E7%89%882.6.1%E6%97%85%E8%A1%8C%E7%89%88%E6%9C%AC.zip&x-mf-biz-cid=99edec67-cd87-47c2-bb50-f360b20956ac-3dab77&cache_type=1&ndcp=1&xmfcid=5efa3bab-dcc1-40bd-9e0e-5c44375314249478eae86e8",
+        ""
+      ],
+      "path": "./.rh/pvzrh261"
+    },
+    {
+      "name": "融合2.6",
+      "links": ["", ""],
+      "path": "./.rh/pvzrh26"
+    },
+    {
+      "name": "融合2.5.1",
+      "links": ["", ""],
+      "path": "./.rh/pvzrh251"
+    },
+    {
+      "name": "融合2.5",
+      "links": ["", ""],
+      "path": "./.rh/pvzrh25"
+    }
+  ]
+}
