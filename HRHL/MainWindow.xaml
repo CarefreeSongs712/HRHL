@@ -8,6 +8,8 @@
         Title="HRHL启动器" Height="450" Width="800"
         Loaded="Window_Loaded">
 
+    
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -53,13 +55,46 @@
             <ScrollViewer x:Name="HomeView" Visibility="Collapsed">
                 <TextBlock Text="欢迎使用HRHL启动器" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </ScrollViewer>
-            <!-- 游戏界面（原始内容） -->
+            <!-- 游戏界面 -->
             <ScrollViewer x:Name="GamesView" VerticalScrollBarVisibility="Auto">
-                <UniformGrid x:Name="MainGrid" Columns="2" Margin="10" />
+                <StackPanel x:Name="MainStackPanel">
+                    <UniformGrid x:Name="MainGrid" Columns="2" Margin="10" />
+                    <StackPanel x:Name="GameFreshStackPanel" HorizontalAlignment="Right" VerticalAlignment="Center"></StackPanel>
+                </StackPanel>
             </ScrollViewer>
             <!-- 游戏设置 -->
             <ScrollViewer x:Name="GameSettingsView" VerticalScrollBarVisibility="Auto">
-                <StackPanel x:Name="GameSettingsContainer" Margin="10"/>
+                <StackPanel x:Name="GameSettingsContainer" Margin="10">
+                    <StackPanel x:Name="GameName" Orientation="Horizontal" HorizontalAlignment="Left" Margin="20,0,0,0">
+                        <Label Content="游戏名：" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"></Label>
+                        <TextBox x:Name="GameNameText"
+                                 Width="200"
+                                 Height="40"
+                                 FontSize="16"
+                                 VerticalContentAlignment="Center"
+                                 MaxLength="50"/>
+                        <Button x:Name="SetGameName" Content="修改游戏名" 
+                                Background="#00D0D0"
+                                Foreground="White"
+                                Margin="10,10,2,10"
+                                Padding="10"
+                                Click="SetGameName_Click"></Button>
+                        <Button x:Name="DelGame" Content="从列表删除" 
+                                Background="Orange"
+                                Foreground="White"
+                                FontWeight="Bold"
+                                Margin="10,10,2,10"
+                                Padding="10"
+                                Click="DelGame_Click"></Button>
+                        <Button x:Name="ForceDelGame" Content="完全删除" 
+                                Background="Red"
+                                Foreground="White"
+                                FontWeight="Bold"
+                                Margin="10,10,2,10"
+                                Padding="10"
+                                Click="ForceDelGame_Click"></Button>
+                    </StackPanel>
+                </StackPanel>
             </ScrollViewer>
             <!-- 下载界面 -->
             <StackPanel x:Name="DownloadsView" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">

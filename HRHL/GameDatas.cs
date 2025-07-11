@@ -28,7 +28,70 @@ public class GameDatas
             Games[i] = new GameData((string)data.Games[i].name, (string)data.Games[i].path);
         }
     }
+    private bool IsValidGame(string path)
+    {
+        var files = Directory.GetFiles(path, "*.exe", SearchOption.TopDirectoryOnly);
+        foreach (var file in files)
+        {
+            if (file.Contains("PlantsVsZombiesRH.exe"))
+            {
+                MessageBox.Show(file);
+                return true;
+            }
+        }
+        return false;
+    }
+    public void ReadDataFromDisk()
+    {
+        string gamedatasPath = "./.rh/.settings/gamedatas.json";
+        if (!File.Exists(gamedatasPath))
+        {
+            MessageBox.Show($"文件 {gamedatasPath} 不存在，无法写入数据。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            Environment.Exit(1);
+        }
 
+
+
+        string[] subFolders = Directory.GetDirectories(@"./.rh", "*", SearchOption.TopDirectoryOnly);
+        GamesNum=0;
+        foreach (var fld in subFolders)
+        {
+            string name = fld.Split(@"\")[1];
+            if(name.StartsWith("."))
+                continue;
+            if (IsValidGame(fld))
+            {
+                Games[GamesNum] = new GameData(name, fld);
+                GamesNum++;
+            }
+        }
+        return;
+        
+        
+        var gamedatas = new
+        {
+            GamesNum = GamesNum,
+            Games = Games.Take(GamesNum).Select(g => new { g.name, g.path }).ToArray()
+        };
+        string jsonData = JsonConvert.SerializeObject(gamedatas, Formatting.Indented);
+        File.WriteAllText(gamedatasPath, jsonData);
+    }
+    public void WriteData()
+    {
+        string gamedatasPath = "./.rh/.settings/gamedatas.json";
+        if (!File.Exists(gamedatasPath))
+        {
+            MessageBox.Show($"文件 {gamedatasPath} 不存在，无法写入数据。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            Environment.Exit(1);
+        }
+        var gamedatas = new
+        {
+            GamesNum = GamesNum,
+            Games = Games.Take(GamesNum).Select(g => new { g.name, g.path }).ToArray()
+        };
+        string jsonData = JsonConvert.SerializeObject(gamedatas, Formatting.Indented);
+        File.WriteAllText(gamedatasPath, jsonData);
+    }
     public void StartGame(int status,string path)
     {
         if (status == 1)
@@ -48,6 +111,31 @@ public class GameDatas
             File.Delete($"{path}winhttp.dll");
             File.Copy($"{path}.melonloader/version.dll", $"{path}version.dll", true);
             Process.Start($"{path}/PlantsVsZombiesRH.exe");
+        }
+    }
+
+    public void RemoveGame(int index,bool force = false)
+    {
+        if (index != -1)
+        {
+            if (force)
+            {
+                var folderPath = Games[index].path;
+                //MessageBox.Show(folderPath);
+                if (Directory.Exists(folderPath))
+                {
+                    Directory.Delete(folderPath, recursive: true);
+                }
+            }
+            var gamesList = Games.ToList();
+            gamesList.RemoveAt(index);
+            Games = gamesList.ToArray();
+            GamesNum--;
+            WriteData();
+        }
+        else
+        {
+            MessageBox.Show("未选择游戏");
         }
     }
 }

@@ -12,6 +12,7 @@ namespace HRHL
         public static GameDatas? gameDatas = new GameDatas();
         public static DownloadDatas? downloadDatas = new DownloadDatas();
         private bool HasReaded = false;
+        private int CurrentGameIndex;
 
         public MainWindow()
         {
@@ -30,24 +31,11 @@ namespace HRHL
         {
             MainGrid.Children.Clear();
             if (HasReaded)
-            {
-                string gamedatasPath = "./.rh/.settings/gamedatas.json";
-                if (!File.Exists(gamedatasPath))
-                {
-                    MessageBox.Show($"文件 {gamedatasPath} 不存在，无法写入数据。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                    Environment.Exit(1);
-                }
-                var gamedatas = new
-                {
-                    GamesNum = gameDatas.GamesNum,
-                    Games = gameDatas.Games.Take(gameDatas.GamesNum).Select(g => new { g.name, g.path }).ToArray()
-                };
-                string jsonData = JsonConvert.SerializeObject(gamedatas, Formatting.Indented);
-                File.WriteAllText(gamedatasPath, jsonData);
-            }
+                gameDatas.WriteData();
             gameDatas.ReadData();
             downloadDatas.ReadData();
             HasReaded = true;
+            // 添加游戏项
             for (int i = 0; i < gameDatas.GamesNum; i++)
             {
                 AddGridItem(i);
@@ -62,20 +50,50 @@ namespace HRHL
                     FontWeight = FontWeights.Bold,
                     FontSize = 30,
                 };
+                var button = new Button
+                {
+                    Content = "→ 前往下载 ←",
+                    Padding = new Thickness(10),
+                    Margin = new Thickness(2, 10, 2, 10),
+                    Background = new SolidColorBrush(Color.FromRgb(0, 200, 200)),
+                    Foreground = Brushes.White,
+                    Tag = $"gotodownload" // 存储唯一标识
+                };
+                button.Click += Button_Click;
+                var stackPanel = new StackPanel();
+                stackPanel.Children.Add(label);
+                stackPanel.Children.Add(button);
                 var border = new Border
                 {
-                    Child = label,
+                    Child = stackPanel,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 };
 
-                GamesView.Content = border;
+                MainStackPanel.Children.Clear();
+                MainStackPanel.Children.Add(border); 
             }
             else
             {
-                GamesView.Content = MainGrid;
+                MainStackPanel.Children.Clear();
+                MainStackPanel.Children.Add(MainGrid); 
+               //GamesView.Content = MainGrid;
             }
-            
+            GameFreshStackPanel.Children.Clear();
+            Button gamefreshbutton =new Button
+            {
+                Content = "重新读取列表",
+                Padding = new Thickness(10),
+                Margin = new Thickness(2, 10, 2, 10),
+                Background = new SolidColorBrush(Color.FromRgb(200, 100, 200)),
+                Foreground = Brushes.White,
+                MaxWidth = 200,
+                Tag = $"refreshgame" // 存储唯一标识
+            };
+            gamefreshbutton.Click += Button_Click;
+            GameFreshStackPanel.Children.Add(gamefreshbutton);
+            MainStackPanel.Children.Add(GameFreshStackPanel); 
+            // 添加下载项
             DownloadGrid.Children.Clear();
             for (int i = 0; i < downloadDatas.DownloadNum; i++)
             {
@@ -203,7 +221,6 @@ namespace HRHL
             // 添加到主网格
             MainGrid.Children.Add(border);
         }
-        
         private void AddDownloadGridItem(int index,bool special = false)
         {
             var border = new Border
@@ -280,19 +297,14 @@ namespace HRHL
             
         }
 
-        private void AddGameSettingsGrid(int index)
+        private void GameSetting(int index)
         {
-            var label = new Label
-            {
-                Content = $"{gameDatas.Games[index].name}",
-                HorizontalAlignment = HorizontalAlignment.Center,
-                FontWeight = FontWeights.Bold,
-                FontSize = 18
-            };
-
-            GameSettingsContainer.Children.Add(label);
+            CurrentGameIndex = index;
+            var name = $"{gameDatas.Games[index].name}";
+            GameNameText.Text = name;
         }
-        
+
+      
         // 不同索引使用不同的按钮颜色
         private Brush GetButtonColor(int index)
         {
@@ -309,64 +321,114 @@ namespace HRHL
         {
             if (sender is Button button && button.Tag is string tag)
             {
-                var parts = tag.Split('|');
-                if (parts.Length == 3)
+                switch (tag)
                 {
-                    var t = int.Parse(parts[0]);
-                    if (t == 2)
+                    case "gotodownload":
                     {
-                        int itemIndex = int.Parse(parts[1]);
-                        int buttonIndex = int.Parse(parts[2]);
-                        if (buttonIndex <= 3)
-                        {
-                            gameDatas.StartGame(buttonIndex, gameDatas.Games[itemIndex].path);
-                        }
-                        else
-                        {
-                            //MessageBox.Show($"你点击了第 {itemIndex} 组的第 {buttonIndex} 个按钮",
-                            //                "操作通知",
-                            //                MessageBoxButton.OK,
-                            //                MessageBoxImage.Information);
-                            GameSettingsContainer.Children.Clear(); //gamesettingsview
-                            AddGameSettingsGrid(itemIndex);
-                            TabButton_Click(TabGameSettings, null); // 跳转到“管理游戏”选项卡
-                        }
+                        TabButton_Click(TabDownloads, null);
+                        break;
                     }
-                    else if (t == 3)
+                    case "refreshgame":
                     {
-                        int itemIndex = int.Parse(parts[1]);
-                        int buttonIndex = int.Parse(parts[2]);
-                        if (itemIndex != -1)
+                        gameDatas.ReadDataFromDisk();
+                        Refresh();
+                        break;
+                    }
+                    default:
+                    {
+                        var parts = tag.Split('|');
+                        if (parts.Length == 3)
                         {
-                            
-                            string DownloadLink = downloadDatas.Downloads[itemIndex].links[buttonIndex - 1];
-                            MessageBox.Show($"马上程序会弹出一个黑窗口，开始下载文件和解压，请勿关闭窗口，请耐心等待操作完成");
-                            Tools.DownloadFileAndUnZip($"{downloadDatas.Downloads[itemIndex].path}/", DownloadLink,
-                                downloadDatas.Downloads[itemIndex].name);
-
-                        }
-                        else
-                        {
-                            if (buttonIndex == 1)
+                            var t = int.Parse(parts[0]);
+                            if (t == 2)
                             {
-                                string? zippath = Tools.SelectFile("选择游戏的 ZIP 文件","ZIP 压缩文件|*.zip|所有文件|*.*");
-                                if (zippath is not null)
+                                int itemIndex = int.Parse(parts[1]);
+                                int buttonIndex = int.Parse(parts[2]);
+                                if (buttonIndex <= 3)
                                 {
-                                    Tools.DownloadFileAndUnZip("./.rh/newgame/",null,"新的游戏",zippath);
+                                    gameDatas.StartGame(buttonIndex, gameDatas.Games[itemIndex].path);
+                                }
+                                else
+                                {
+                                    GameSetting(itemIndex);
+                                    TabButton_Click(TabGameSettings, null); // 跳转到“管理游戏”选项卡
                                 }
                             }
-                            else
+                            else if (t == 3)
                             {
-                                MessageBox.Show("还在开发...");
+                                int itemIndex = int.Parse(parts[1]);
+                                int buttonIndex = int.Parse(parts[2]);
+                                if (itemIndex != -1)
+                                {
+
+                                    string DownloadLink = downloadDatas.Downloads[itemIndex].links[buttonIndex - 1];
+                                    //MessageBox.Show($"马上程序会弹出一个黑窗口，开始下载文件和解压，请勿关闭窗口，请耐心等待操作完成");
+                                    Tools.DownloadFileAndUnZip($"{downloadDatas.Downloads[itemIndex].path}/",
+                                        DownloadLink,
+                                        downloadDatas.Downloads[itemIndex].name);
+
+                                }
+                                else
+                                {
+                                    if (buttonIndex == 1)
+                                    {
+                                        string? zippath = Tools.SelectFile("选择游戏的 ZIP 文件", "ZIP 压缩文件|*.zip|所有文件|*.*");
+                                        if (zippath is not null)
+                                        {
+                                            Tools.DownloadFileAndUnZip("./.rh/newgame/", null, "新的游戏", zippath);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        MessageBox.Show("还在开发...");
+                                    }
+
+
+                                }
+                                TabButton_Click(TabGames, null);
+                                Refresh();
+
                             }
-                           
-                            
                         }
-                        Refresh();
-                        
+                        break;
                     }
                 }
             }
         }
+        
+        private void SetGameName_Click(object sender, RoutedEventArgs e)
+        {
+            string newName = GameNameText.Text;
+            if (!string.IsNullOrEmpty(newName))
+            {
+                if (CurrentGameIndex != -1)
+                {
+                    gameDatas.Games[CurrentGameIndex].name = newName;
+                    gameDatas.WriteData();
+                    Refresh();
+                }
+                else
+                {
+                    MessageBox.Show("未选择游戏");
+                }
+            }
+            else
+            {
+                MessageBox.Show("请输入新的游戏名称");
+            }
+        }
+        private void DelGame_Click(object sender, RoutedEventArgs e)
+        {
+            gameDatas.RemoveGame(CurrentGameIndex);
+            Refresh();
+            TabButton_Click(TabGames, null);
+        }
+        private void ForceDelGame_Click(object sender, RoutedEventArgs e)
+        {
+            gameDatas.RemoveGame(CurrentGameIndex,true);
+            Refresh();
+            TabButton_Click(TabGames, null);
+        }
+
     }
 }
