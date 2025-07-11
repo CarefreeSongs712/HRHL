@@ -7,7 +7,7 @@ namespace HRHL;
 
 public class GameDatas
 {
-    public int GamesNum;
+    public int GamesNum = 0;
     public GameData[] Games = new GameData[64];
 
     public void ReadData()
@@ -22,7 +22,6 @@ public class GameDatas
         }
         string jsonData = File.ReadAllText(filePath);
         var data = JsonConvert.DeserializeObject<dynamic>(jsonData);
-        Debug.Assert(data != null, nameof(data) + " != null");
         GamesNum = data.GamesNum;
         for (int i = 0; i < GamesNum; i++)
         {

@@ -95,8 +95,8 @@ namespace HRHL
 
                 //删除
                 File.Delete($"{startupPath}{path}/.game.zip");
-                MainWindow.GameDatas.Games[MainWindow.GameDatas.GamesNum] = new GameData(name, $"{path}");
-                MainWindow.GameDatas.GamesNum++;
+                MainWindow.gameDatas.Games[MainWindow.gameDatas.GamesNum] = new GameData(name, $"{path}");
+                MainWindow.gameDatas.GamesNum++;
 
                 // 安装B&M
                 Process process3 = new Process();

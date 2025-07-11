@@ -1,17 +1,17 @@
-﻿using System.Diagnostics;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Data;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-
+using System.Xml.Schema;
 namespace HRHL
 {
-    public partial class MainWindow
+    public partial class MainWindow : Window
     {
-        public static GameDatas? GameDatas = new GameDatas();
-        public static DownloadDatas? DownloadDatas = new DownloadDatas();
-        private bool _hasReaded;
+        public static GameDatas? gameDatas = new GameDatas();
+        public static DownloadDatas? downloadDatas = new DownloadDatas();
+        private bool HasReaded = false;
 
         public MainWindow()
         {
@@ -21,19 +21,15 @@ namespace HRHL
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // 初始化选项卡按钮
-            TabButton_Click(TabGames, null!);
+            TabButton_Click(TabGames, null);
 
             Refresh();
         }
 
         private void Refresh()
         {
-            #region Assert
-            Debug.Assert(GameDatas != null, nameof(GameDatas) + " != null");
-            Debug.Assert(DownloadDatas != null, nameof(DownloadDatas) + " != null");
-            #endregion
             MainGrid.Children.Clear();
-            if (_hasReaded)
+            if (HasReaded)
             {
                 string gamedatasPath = "./.rh/.settings/gamedatas.json";
                 if (!File.Exists(gamedatasPath))
@@ -41,23 +37,22 @@ namespace HRHL
                     MessageBox.Show($"文件 {gamedatasPath} 不存在，无法写入数据。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     Environment.Exit(1);
                 }
-
                 var gamedatas = new
                 {
-                    GameDatas.GamesNum,
-                    Games = GameDatas.Games.Take(GameDatas.GamesNum).Select(g => new { name = g.Name, path = g.Path }).ToArray()
+                    GamesNum = gameDatas.GamesNum,
+                    Games = gameDatas.Games.Take(gameDatas.GamesNum).Select(g => new { g.name, g.path }).ToArray()
                 };
                 string jsonData = JsonConvert.SerializeObject(gamedatas, Formatting.Indented);
                 File.WriteAllText(gamedatasPath, jsonData);
             }
-            GameDatas.ReadData();
-            DownloadDatas.ReadData();
-            _hasReaded = true;
-            for (int i = 0; i < GameDatas.GamesNum; i++)
+            gameDatas.ReadData();
+            downloadDatas.ReadData();
+            HasReaded = true;
+            for (int i = 0; i < gameDatas.GamesNum; i++)
             {
                 AddGridItem(i);
             }
-            if (GameDatas.GamesNum == 0)
+            if (gameDatas.GamesNum == 0)
             {
                 var label = new Label
                 {
@@ -67,25 +62,9 @@ namespace HRHL
                     FontWeight = FontWeights.Bold,
                     FontSize = 30,
                 };
-                var button = new Button
-                {
-                    Content = $"→ 前往下载界面 ←",
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontWeight = FontWeights.Bold,
-                    FontSize = 20,
-                    Padding = new Thickness(10),
-                    Margin = new Thickness(2, 0, 2, 0),
-                    Background = new SolidColorBrush(Color.FromRgb(0, 200, 200)), // 获取按钮颜色
-                    Foreground = Brushes.White,
-                    Tag = $"gotodownload" // 存储唯一标识
-                };
-                var stackPanel = new StackPanel();
-                stackPanel.Children.Add(label);
-                stackPanel.Children.Add(button);
                 var border = new Border
                 {
-                    Child = stackPanel,
+                    Child = label,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 };
@@ -98,7 +77,7 @@ namespace HRHL
             }
             
             DownloadGrid.Children.Clear();
-            for (int i = 0; i < DownloadDatas.DownloadNum; i++)
+            for (int i = 0; i < downloadDatas.DownloadNum; i++)
             {
                 AddDownloadGridItem(i);
             }
@@ -129,7 +108,7 @@ namespace HRHL
             DownloadModsView.Visibility = Visibility.Collapsed;
             SettingsView.Visibility = Visibility.Collapsed;
 
-            Button? clickedButton = sender as Button;
+            Button clickedButton = sender as Button;
 
             // 设置选中样式
             if (clickedButton != null)
@@ -165,10 +144,6 @@ namespace HRHL
         
         private void AddGridItem(int index)
         {
-            #region Assert
-            Debug.Assert(GameDatas != null, nameof(GameDatas) + " != null");
-            #endregion
-            
             var border = new Border
             {
                 BorderBrush = Brushes.LightGray,
@@ -183,7 +158,7 @@ namespace HRHL
 
             var label = new Label
             {
-                Content = $"{GameDatas.Games[index].Name}",
+                Content = $"{gameDatas.Games[index].name}",
                 HorizontalAlignment = HorizontalAlignment.Center,
                 FontWeight = FontWeights.Bold,
                 FontSize = 18
@@ -231,10 +206,6 @@ namespace HRHL
         
         private void AddDownloadGridItem(int index,bool special = false)
         {
-            #region Assert
-            Debug.Assert(DownloadDatas != null, nameof(DownloadDatas) + " != null");
-            #endregion
-            
             var border = new Border
             {
                 BorderBrush = Brushes.LightGray,
@@ -249,7 +220,7 @@ namespace HRHL
 
             var label = new Label
             {
-                Content = special ? "从本地安装" : $"{DownloadDatas.Downloads[index].Name}",
+                Content = special ? "从本地安装" : $"{downloadDatas.Downloads[index].name}",
                 HorizontalAlignment = HorizontalAlignment.Center,
                 FontWeight = FontWeights.Bold,
                 FontSize = 18
@@ -311,12 +282,9 @@ namespace HRHL
 
         private void AddGameSettingsGrid(int index)
         {
-            #region Assert
-            Debug.Assert(GameDatas != null, nameof(GameDatas) + " != null");
-            #endregion
             var label = new Label
             {
-                Content = $"{GameDatas.Games[index].Name}",
+                Content = $"{gameDatas.Games[index].name}",
                 HorizontalAlignment = HorizontalAlignment.Center,
                 FontWeight = FontWeights.Bold,
                 FontSize = 18
@@ -341,10 +309,6 @@ namespace HRHL
         {
             if (sender is Button button && button.Tag is string tag)
             {
-                #region Assert
-                Debug.Assert(GameDatas != null, nameof(GameDatas) + " != null");
-                Debug.Assert(DownloadDatas != null, nameof(DownloadDatas) + " != null");
-                #endregion
                 var parts = tag.Split('|');
                 if (parts.Length == 3)
                 {
@@ -355,7 +319,7 @@ namespace HRHL
                         int buttonIndex = int.Parse(parts[2]);
                         if (buttonIndex <= 3)
                         {
-                            GameDatas.StartGame(buttonIndex, GameDatas.Games[itemIndex].Path);
+                            gameDatas.StartGame(buttonIndex, gameDatas.Games[itemIndex].path);
                         }
                         else
                         {
@@ -365,7 +329,7 @@ namespace HRHL
                             //                MessageBoxImage.Information);
                             GameSettingsContainer.Children.Clear(); //gamesettingsview
                             AddGameSettingsGrid(itemIndex);
-                            TabButton_Click(TabGameSettings, null!); // 跳转到“管理游戏”选项卡
+                            TabButton_Click(TabGameSettings, null); // 跳转到“管理游戏”选项卡
                         }
                     }
                     else if (t == 3)
@@ -374,10 +338,11 @@ namespace HRHL
                         int buttonIndex = int.Parse(parts[2]);
                         if (itemIndex != -1)
                         {
-                            string downloadLink = DownloadDatas.Downloads[itemIndex].Links[buttonIndex - 1];
+                            
+                            string DownloadLink = downloadDatas.Downloads[itemIndex].links[buttonIndex - 1];
                             MessageBox.Show($"马上程序会弹出一个黑窗口，开始下载文件和解压，请勿关闭窗口，请耐心等待操作完成");
-                            Tools.DownloadFileAndUnZip($"{DownloadDatas.Downloads[itemIndex].Path}/", downloadLink,
-                                DownloadDatas.Downloads[itemIndex].Name);
+                            Tools.DownloadFileAndUnZip($"{downloadDatas.Downloads[itemIndex].path}/", DownloadLink,
+                                downloadDatas.Downloads[itemIndex].name);
 
                         }
                         else
@@ -399,13 +364,6 @@ namespace HRHL
                         }
                         Refresh();
                         
-                    }
-                }
-                else if (parts.Length == 0)
-                {
-                    if (tag == "gotodownload")
-                    {
-                        TabButton_Click(TabDownloads,null!);
                     }
                 }
             }
