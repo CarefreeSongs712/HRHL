@@ -1,116 +1,17 @@
-﻿using Newtonsoft.Json;
-using System.Data;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using Newtonsoft.Json;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Xml.Schema;
+
 namespace HRHL
-{    
-    public class GameData
+{
+    public partial class MainWindow
     {
-        public string name = "";
-        public string path = "";
-        public GameData(string name,string path) 
-        {
-            this.name = name;
-            this.path = path;
-        }
-    }
-    public class DownloadData
-    {
-        public string name = "";
-        public string[] links = new string[8];
-        public string path = "";
-        public DownloadData(string name , string[] links,string path)
-        {
-            this.name = name;
-            this.links = links;
-            this.path = path;
-        }
-    }
-
-    public class GameDatas
-    {
-        public int GamesNum = 0;
-        public GameData[] Games = new GameData[64];
-
-        public void ReadData()
-        {
-            string filePath = "./.rh/.settings/gamedatas.json";
-            if (!File.Exists(filePath))
-            {
-                MessageBox.Show($"文件 {filePath} 不存在，无法读取数据。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                //Environment.Exit(1);
-                GamesNum = 0;
-                return;
-            }
-            string jsonData = File.ReadAllText(filePath);
-            var data = JsonConvert.DeserializeObject<dynamic>(jsonData);
-            GamesNum = data.GamesNum;
-            for (int i = 0; i < GamesNum; i++)
-            {
-                Games[i] = new GameData((string)data.Games[i].name, (string)data.Games[i].path);
-            }
-        }
-
-        public void StartGame(int status,string path)
-        {
-            if (status == 1)
-            {// 原版
-                File.Delete($"{path}winhttp.dll");
-                File.Delete($"{path}version.dll");
-                Process.Start($"{path}/PlantsVsZombiesRH.exe");
-            }
-            if (status == 2)
-            {// B
-                File.Delete($"{path}version.dll");
-                File.Copy($"{path}.bepinex/winhttp.dll", $"{path}winhttp.dll", true);
-                Process.Start($"{path}/PlantsVsZombiesRH.exe");
-            }
-            if(status == 3)
-            {// M
-                File.Delete($"{path}winhttp.dll");
-                File.Copy($"{path}.melonloader/version.dll", $"{path}version.dll", true);
-                Process.Start($"{path}/PlantsVsZombiesRH.exe");
-            }
-        }
-    }
-
-    public class DownloadDatas
-    {
-        public int DownloadNum = 0;
-        public DownloadData[] Downloads = new DownloadData[64];
-
-        public void ReadData()
-        {
-            string filePath = "./.rh/.settings/downloaddatas.json";
-            if (!File.Exists(filePath))
-            {
-                MessageBox.Show($"文件 {filePath} 不存在，无法读取数据。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                Environment.Exit(1);
-            }
-            string jsonData = File.ReadAllText(filePath);
-            var data = JsonConvert.DeserializeObject<dynamic>(jsonData);
-            DownloadNum = data.DownloadNum;
-            for (int i = 0; i < DownloadNum; i++)
-            {
-                Downloads[i] = new DownloadData(
-                    (string)data.Downloads[i].name,
-                    data.Downloads[i].links.ToObject<string[]>(),
-                    (string)data.Downloads[i].path
-                );
-            }
-        }
-
-
-    }
-    public partial class MainWindow : Window
-    {
-        public static GameDatas? gameDatas = new GameDatas();
-        public static DownloadDatas? downloadDatas = new DownloadDatas();
-        private bool HasReaded = false;
+        public static GameDatas? GameDatas = new GameDatas();
+        public static DownloadDatas? DownloadDatas = new DownloadDatas();
+        private bool _hasReaded;
 
         public MainWindow()
         {
@@ -120,15 +21,19 @@ namespace HRHL
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // 初始化选项卡按钮
-            TabButton_Click(TabGames, null);
+            TabButton_Click(TabGames, null!);
 
             Refresh();
         }
 
         private void Refresh()
         {
+            #region Assert
+            Debug.Assert(GameDatas != null, nameof(GameDatas) + " != null");
+            Debug.Assert(DownloadDatas != null, nameof(DownloadDatas) + " != null");
+            #endregion
             MainGrid.Children.Clear();
-            if (HasReaded)
+            if (_hasReaded)
             {
                 string gamedatasPath = "./.rh/.settings/gamedatas.json";
                 if (!File.Exists(gamedatasPath))
@@ -136,22 +41,23 @@ namespace HRHL
                     MessageBox.Show($"文件 {gamedatasPath} 不存在，无法写入数据。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     Environment.Exit(1);
                 }
+
                 var gamedatas = new
                 {
-                    GamesNum = gameDatas.GamesNum,
-                    Games = gameDatas.Games.Take(gameDatas.GamesNum).Select(g => new { g.name, g.path }).ToArray()
+                    GameDatas.GamesNum,
+                    Games = GameDatas.Games.Take(GameDatas.GamesNum).Select(g => new { name = g.Name, path = g.Path }).ToArray()
                 };
                 string jsonData = JsonConvert.SerializeObject(gamedatas, Formatting.Indented);
                 File.WriteAllText(gamedatasPath, jsonData);
             }
-            gameDatas.ReadData();
-            downloadDatas.ReadData();
-            HasReaded = true;
-            for (int i = 0; i < gameDatas.GamesNum; i++)
+            GameDatas.ReadData();
+            DownloadDatas.ReadData();
+            _hasReaded = true;
+            for (int i = 0; i < GameDatas.GamesNum; i++)
             {
                 AddGridItem(i);
             }
-            if (gameDatas.GamesNum == 0)
+            if (GameDatas.GamesNum == 0)
             {
                 var label = new Label
                 {
@@ -161,9 +67,25 @@ namespace HRHL
                     FontWeight = FontWeights.Bold,
                     FontSize = 30,
                 };
+                var button = new Button
+                {
+                    Content = $"→ 前往下载界面 ←",
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontWeight = FontWeights.Bold,
+                    FontSize = 20,
+                    Padding = new Thickness(10),
+                    Margin = new Thickness(2, 0, 2, 0),
+                    Background = new SolidColorBrush(Color.FromRgb(0, 200, 200)), // 获取按钮颜色
+                    Foreground = Brushes.White,
+                    Tag = $"gotodownload" // 存储唯一标识
+                };
+                var stackPanel = new StackPanel();
+                stackPanel.Children.Add(label);
+                stackPanel.Children.Add(button);
                 var border = new Border
                 {
-                    Child = label,
+                    Child = stackPanel,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 };
@@ -176,7 +98,7 @@ namespace HRHL
             }
             
             DownloadGrid.Children.Clear();
-            for (int i = 0; i < downloadDatas.DownloadNum; i++)
+            for (int i = 0; i < DownloadDatas.DownloadNum; i++)
             {
                 AddDownloadGridItem(i);
             }
@@ -188,20 +110,26 @@ namespace HRHL
             // 重置所有选项卡样式
             TabHome.Background = Brushes.Transparent;
             TabGames.Background = Brushes.Transparent;
+            TabGameSettings.Background = Brushes.Transparent;
             TabDownloads.Background = Brushes.Transparent;
+            TabDownloadMods.Background = Brushes.Transparent;
             TabSettings.Background = Brushes.Transparent;
             TabHome.Foreground = Brushes.White;
             TabGames.Foreground = Brushes.White;
+            TabGameSettings.Foreground = Brushes.White;
             TabDownloads.Foreground = Brushes.White;
+            TabDownloadMods.Foreground = Brushes.White;
             TabSettings.Foreground = Brushes.White;
 
             // 隐藏所有视图
             HomeView.Visibility = Visibility.Collapsed;
             GamesView.Visibility = Visibility.Collapsed;
+            GameSettingsView.Visibility = Visibility.Collapsed;
             DownloadsView.Visibility = Visibility.Collapsed;
+            DownloadModsView.Visibility = Visibility.Collapsed;
             SettingsView.Visibility = Visibility.Collapsed;
 
-            Button clickedButton = sender as Button;
+            Button? clickedButton = sender as Button;
 
             // 设置选中样式
             if (clickedButton != null)
@@ -220,16 +148,27 @@ namespace HRHL
                 case "games":
                     GamesView.Visibility = Visibility.Visible;
                     break;
+                case "gamesettings":
+                    GameSettingsView.Visibility = Visibility.Visible;
+                    break;
                 case "downloads":
                     DownloadsView.Visibility = Visibility.Visible;
+                    break;
+                case "downloadmods":
+                    DownloadModsView.Visibility = Visibility.Visible;
                     break;
                 case "settings":
                     SettingsView.Visibility = Visibility.Visible;
                     break;
             }
         }
+        
         private void AddGridItem(int index)
         {
+            #region Assert
+            Debug.Assert(GameDatas != null, nameof(GameDatas) + " != null");
+            #endregion
+            
             var border = new Border
             {
                 BorderBrush = Brushes.LightGray,
@@ -244,7 +183,7 @@ namespace HRHL
 
             var label = new Label
             {
-                Content = $"{gameDatas.Games[index].name}",
+                Content = $"{GameDatas.Games[index].Name}",
                 HorizontalAlignment = HorizontalAlignment.Center,
                 FontWeight = FontWeights.Bold,
                 FontSize = 18
@@ -289,9 +228,13 @@ namespace HRHL
             // 添加到主网格
             MainGrid.Children.Add(border);
         }
-
+        
         private void AddDownloadGridItem(int index,bool special = false)
         {
+            #region Assert
+            Debug.Assert(DownloadDatas != null, nameof(DownloadDatas) + " != null");
+            #endregion
+            
             var border = new Border
             {
                 BorderBrush = Brushes.LightGray,
@@ -306,7 +249,7 @@ namespace HRHL
 
             var label = new Label
             {
-                Content = special ? "从本地安装" : $"{downloadDatas.Downloads[index].name}",
+                Content = special ? "从本地安装" : $"{DownloadDatas.Downloads[index].Name}",
                 HorizontalAlignment = HorizontalAlignment.Center,
                 FontWeight = FontWeights.Bold,
                 FontSize = 18
@@ -366,6 +309,22 @@ namespace HRHL
             
         }
 
+        private void AddGameSettingsGrid(int index)
+        {
+            #region Assert
+            Debug.Assert(GameDatas != null, nameof(GameDatas) + " != null");
+            #endregion
+            var label = new Label
+            {
+                Content = $"{GameDatas.Games[index].Name}",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                FontWeight = FontWeights.Bold,
+                FontSize = 18
+            };
+
+            GameSettingsContainer.Children.Add(label);
+        }
+        
         // 不同索引使用不同的按钮颜色
         private Brush GetButtonColor(int index)
         {
@@ -382,6 +341,10 @@ namespace HRHL
         {
             if (sender is Button button && button.Tag is string tag)
             {
+                #region Assert
+                Debug.Assert(GameDatas != null, nameof(GameDatas) + " != null");
+                Debug.Assert(DownloadDatas != null, nameof(DownloadDatas) + " != null");
+                #endregion
                 var parts = tag.Split('|');
                 if (parts.Length == 3)
                 {
@@ -392,14 +355,17 @@ namespace HRHL
                         int buttonIndex = int.Parse(parts[2]);
                         if (buttonIndex <= 3)
                         {
-                            gameDatas.StartGame(buttonIndex, gameDatas.Games[itemIndex].path);
+                            GameDatas.StartGame(buttonIndex, GameDatas.Games[itemIndex].Path);
                         }
                         else
                         {
-                            MessageBox.Show($"你点击了第 {itemIndex} 组的第 {buttonIndex} 个按钮",
-                                            "操作通知",
-                                            MessageBoxButton.OK,
-                                            MessageBoxImage.Information);
+                            //MessageBox.Show($"你点击了第 {itemIndex} 组的第 {buttonIndex} 个按钮",
+                            //                "操作通知",
+                            //                MessageBoxButton.OK,
+                            //                MessageBoxImage.Information);
+                            GameSettingsContainer.Children.Clear(); //gamesettingsview
+                            AddGameSettingsGrid(itemIndex);
+                            TabButton_Click(TabGameSettings, null!); // 跳转到“管理游戏”选项卡
                         }
                     }
                     else if (t == 3)
@@ -408,11 +374,10 @@ namespace HRHL
                         int buttonIndex = int.Parse(parts[2]);
                         if (itemIndex != -1)
                         {
-                            
-                            string DownloadLink = downloadDatas.Downloads[itemIndex].links[buttonIndex - 1];
+                            string downloadLink = DownloadDatas.Downloads[itemIndex].Links[buttonIndex - 1];
                             MessageBox.Show($"马上程序会弹出一个黑窗口，开始下载文件和解压，请勿关闭窗口，请耐心等待操作完成");
-                            Tools.DownloadFileAndUnZip($"{downloadDatas.Downloads[itemIndex].path}/", DownloadLink,
-                                downloadDatas.Downloads[itemIndex].name);
+                            Tools.DownloadFileAndUnZip($"{DownloadDatas.Downloads[itemIndex].Path}/", downloadLink,
+                                DownloadDatas.Downloads[itemIndex].Name);
 
                         }
                         else
@@ -434,6 +399,13 @@ namespace HRHL
                         }
                         Refresh();
                         
+                    }
+                }
+                else if (parts.Length == 0)
+                {
+                    if (tag == "gotodownload")
+                    {
+                        TabButton_Click(TabDownloads,null!);
                     }
                 }
             }

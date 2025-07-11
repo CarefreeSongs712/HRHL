@@ -24,11 +24,19 @@
                         Click="TabButton_Click" Background="AliceBlue"
                         Margin="10,0" Padding="15,8"
                         FontSize="14" FontWeight="Bold"/>
-                <Button x:Name="TabGames" Content="游戏" Tag="games" 
+                <Button x:Name="TabGames" Content="所有游戏" Tag="games" 
                         Click="TabButton_Click" Background="AliceBlue"
                         Margin="10,0" Padding="15,8"
                         FontSize="14" FontWeight="Bold"/>
-                <Button x:Name="TabDownloads" Content="下载" Tag="downloads" 
+                <Button x:Name="TabGameSettings" Content="管理游戏" Tag="gamesettings" 
+                        Click="TabButton_Click" Background="AliceBlue"
+                        Margin="10,0" Padding="15,8"
+                        FontSize="14" FontWeight="Bold"/>
+                <Button x:Name="TabDownloads" Content="安装游戏" Tag="downloads" 
+                        Click="TabButton_Click" Background="AliceBlue"
+                        Margin="10,0" Padding="15,8"
+                        FontSize="14" FontWeight="Bold"/>
+                <Button x:Name="TabDownloadMods" Content="安装mod" Tag="downloadmods" 
                         Click="TabButton_Click" Background="AliceBlue"
                         Margin="10,0" Padding="15,8"
                         FontSize="14" FontWeight="Bold"/>
@@ -45,15 +53,21 @@
             <ScrollViewer x:Name="HomeView" Visibility="Collapsed">
                 <TextBlock Text="欢迎使用HRHL启动器" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </ScrollViewer>
-
             <!-- 游戏界面（原始内容） -->
             <ScrollViewer x:Name="GamesView" VerticalScrollBarVisibility="Auto">
                 <UniformGrid x:Name="MainGrid" Columns="2" Margin="10" />
             </ScrollViewer>
-
+            <!-- 游戏设置 -->
+            <ScrollViewer x:Name="GameSettingsView" VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="GameSettingsContainer" Margin="10"/>
+            </ScrollViewer>
             <!-- 下载界面 -->
             <StackPanel x:Name="DownloadsView" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <UniformGrid x:Name="DownloadGrid" Columns="3" Margin="10" />
+            </StackPanel>
+            <!-- 下载界面 -->
+            <StackPanel x:Name="DownloadModsView" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <UniformGrid x:Name="DownloadModsGrid" Columns="3" Margin="10" />
             </StackPanel>
 
             <!-- 设置界面 -->
