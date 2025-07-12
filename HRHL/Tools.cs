@@ -98,6 +98,9 @@ namespace HRHL
                 MainWindow.gameDatas.Games[MainWindow.gameDatas.GamesNum] = new GameData(name, $"{path}");
                 MainWindow.gameDatas.GamesNum++;
 
+                //写入数据
+                File.WriteAllText($"{startupPath}{path}/.name", name);
+                
                 // 安装B&M
                 Process process3 = new Process();
                 process3.StartInfo = new ProcessStartInfo
@@ -110,6 +113,7 @@ namespace HRHL
                 };
                 process3.Start();
                 process3.WaitForExit();
+                
             }
             catch (Exception e)
             {

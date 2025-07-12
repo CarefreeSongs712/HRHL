@@ -64,36 +64,85 @@
             </ScrollViewer>
             <!-- 游戏设置 -->
             <ScrollViewer x:Name="GameSettingsView" VerticalScrollBarVisibility="Auto">
-                <StackPanel x:Name="GameSettingsContainer" Margin="10">
-                    <StackPanel x:Name="GameName" Orientation="Horizontal" HorizontalAlignment="Left" Margin="20,0,0,0">
+                <StackPanel x:Name="GameSettingsContainer" Margin="5,10,0,0">
+                    <StackPanel x:Name="GameSettings1" Orientation="Horizontal"  HorizontalAlignment="Left" Margin="20,0,0,5" MaxHeight="30">
                         <Label Content="游戏名：" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"></Label>
                         <TextBox x:Name="GameNameText"
                                  Width="200"
-                                 Height="40"
+                                 Height="30"
                                  FontSize="16"
+                                 Margin="16,0,2,0"
                                  VerticalContentAlignment="Center"
                                  MaxLength="50"/>
                         <Button x:Name="SetGameName" Content="修改游戏名" 
                                 Background="#00D0D0"
                                 Foreground="White"
-                                Margin="10,10,2,10"
-                                Padding="10"
+                                Margin="10,0,2,0"
+                                Padding="10,0"
                                 Click="SetGameName_Click"></Button>
                         <Button x:Name="DelGame" Content="从列表删除" 
                                 Background="Orange"
                                 Foreground="White"
                                 FontWeight="Bold"
-                                Margin="10,10,2,10"
-                                Padding="10"
+                                Margin="10,0,2,0"
+                                Padding="10,0"
                                 Click="DelGame_Click"></Button>
                         <Button x:Name="ForceDelGame" Content="完全删除" 
                                 Background="Red"
                                 Foreground="White"
                                 FontWeight="Bold"
-                                Margin="10,10,2,10"
-                                Padding="10"
+                                Margin="10,0,2,0"
+                                Padding="10,0"
                                 Click="ForceDelGame_Click"></Button>
                     </StackPanel>
+                    <StackPanel x:Name="GameSettings2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="20,0,0,0" MaxHeight="30">
+                        <Label Content="游戏路径：" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"></Label>
+                        <TextBox x:Name="GamePathText"
+                                 Width="200"
+                                 Height="30"
+                                 FontSize="16"
+                                 VerticalContentAlignment="Center"
+                                 MaxLength="50"/>         
+                        <Button x:Name="SetPathName" Content="修改路径名" 
+                                Background="#00D0D0"
+                                Foreground="White"
+                                Margin="10,0,2,0"
+                                Padding="10,0"
+                                Click="SetGamePath_Click"></Button>
+                        <Button x:Name="OpenGamePath" Content="在文件资源管理器打开" 
+                                Background="#00D0D0"
+                                Foreground="White"
+                                Margin="10,0,2,0"
+                                Padding="10,0"
+                                Click="OpenGamePath_Click"></Button>
+                    </StackPanel>
+                    <Label Content="模组管理：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="18" Margin="20,10,0,0"></Label>
+                    <Border Padding="10" Margin="10" MinHeight="300">
+                        <StackPanel Orientation="Horizontal" > <!-- 下 -->
+                            <StackPanel MaxWidth="100"> <!-- 右 -->
+                            
+                                <Button x:Name="BepInExModMgr" Content="BepInEx" 
+                                        Background="#00D0D0"
+                                        Foreground="White"
+                                        Margin="0,10"
+                                        Padding="10"
+                                        Click="BepInExModMgr_Click"></Button>
+                                <Button x:Name="MelonModMgr" Content="MelonLoader" 
+                                        Background="#00D0D0"
+                                        Foreground="White"
+                                        Margin="0,10"
+                                        Padding="10"
+                                        Click="MelonModMgr_Click"></Button>
+                            </StackPanel>
+                            <StackPanel> <!-- 左 -->
+                                <ScrollViewer x:Name="ModsView" Visibility="Collapsed">
+                                    
+                                </ScrollViewer>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    
+                    
                 </StackPanel>
             </ScrollViewer>
             <!-- 下载界面 -->

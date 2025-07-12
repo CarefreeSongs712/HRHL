@@ -1,10 +1,13 @@
 ﻿using Newtonsoft.Json;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Xml.Schema;
+using Microsoft.Win32;
+
 namespace HRHL
 {
     public partial class MainWindow : Window
@@ -13,6 +16,7 @@ namespace HRHL
         public static DownloadDatas? downloadDatas = new DownloadDatas();
         private bool HasReaded = false;
         private int CurrentGameIndex;
+        private string CurrentGameName;
 
         public MainWindow()
         {
@@ -23,7 +27,7 @@ namespace HRHL
         {
             // 初始化选项卡按钮
             TabButton_Click(TabGames, null);
-
+            gameDatas.ReadDataFromDisk();
             Refresh();
         }
 
@@ -300,8 +304,9 @@ namespace HRHL
         private void GameSetting(int index)
         {
             CurrentGameIndex = index;
-            var name = $"{gameDatas.Games[index].name}";
-            GameNameText.Text = name;
+            CurrentGameName = $"{gameDatas.Games[index].name}";
+            GameNameText.Text = $"{gameDatas.Games[index].name}";
+            GamePathText.Text = $"{gameDatas.Games[index].path.Replace("./.rh/","").Replace("./.rh\\","").Replace("\\","").Replace("/","")}";
         }
 
       
@@ -366,6 +371,7 @@ namespace HRHL
                                     Tools.DownloadFileAndUnZip($"{downloadDatas.Downloads[itemIndex].path}/",
                                         DownloadLink,
                                         downloadDatas.Downloads[itemIndex].name);
+                                    
 
                                 }
                                 else
@@ -401,9 +407,10 @@ namespace HRHL
             string newName = GameNameText.Text;
             if (!string.IsNullOrEmpty(newName))
             {
-                if (CurrentGameIndex != -1)
+                if (CurrentGameIndex != -1 && CurrentGameIndex<gameDatas.GamesNum)
                 {
                     gameDatas.Games[CurrentGameIndex].name = newName;
+                    File.WriteAllText($"{gameDatas.Games[CurrentGameIndex].path}/.name", newName);
                     gameDatas.WriteData();
                     Refresh();
                 }
@@ -429,6 +436,47 @@ namespace HRHL
             Refresh();
             TabButton_Click(TabGames, null);
         }
+        private void SetGamePath_Click(object sender, RoutedEventArgs e)
+        { 
+            string newPath = GamePathText.Text;
+            if (!string.IsNullOrEmpty(newPath))
+            {
+                if (CurrentGameIndex != -1)
+                {
+                    if (newPath == gameDatas.Games[CurrentGameIndex].path)
+                    {
+                        return;
+                    }
+                    Tools.MoveDirectory($"{gameDatas.Games[CurrentGameIndex].path}", $"./.rh/{newPath}");
+                    gameDatas.Games[CurrentGameIndex].path = $"./.rh/{newPath}";
+                    gameDatas.WriteData();
+                    Refresh();
+                }
+                else
+                {
+                    MessageBox.Show("未选择游戏");
+                }
+            }
+            else
+            {
+                MessageBox.Show("请输入新的游戏名称");
+            }
+        }
 
+        private void OpenGamePath_Click(object sender, RoutedEventArgs e)
+        {
+            //MessageBox.Show($"./.rh/{GamePathText.Text}/");
+            Process.Start($"explorer.exe",Path.GetDirectoryName($"./.rh/{GamePathText.Text}/"));
+        }
+
+        private void BepInExModMgr_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void MelonModMgr_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -35,7 +35,7 @@ public class GameDatas
         {
             if (file.Contains("PlantsVsZombiesRH.exe"))
             {
-                MessageBox.Show(file);
+                //MessageBox.Show(file);
                 return true;
             }
         }
@@ -51,7 +51,6 @@ public class GameDatas
         }
 
 
-
         string[] subFolders = Directory.GetDirectories(@"./.rh", "*", SearchOption.TopDirectoryOnly);
         GamesNum=0;
         foreach (var fld in subFolders)
@@ -61,6 +60,14 @@ public class GameDatas
                 continue;
             if (IsValidGame(fld))
             {
+                if (File.Exists($"{fld}/.name"))
+                {
+                    using (StreamReader reader = new StreamReader($"{fld}/.name"))
+                    {
+                        string line = reader.ReadLine();
+                        name = line.Trim();
+                    }
+                }
                 Games[GamesNum] = new GameData(name, fld);
                 GamesNum++;
             }
@@ -94,34 +101,38 @@ public class GameDatas
     }
     public void StartGame(int status,string path)
     {
+        if (!path.EndsWith("/") && !path.EndsWith("\\"))
+        {
+            path += "/";
+        }
+
         if (status == 1)
         {// 原版
             File.Delete($"{path}winhttp.dll");
             File.Delete($"{path}version.dll");
-            Process.Start($"{path}/PlantsVsZombiesRH.exe");
+            Process.Start($"{path}PlantsVsZombiesRH.exe");
         }
         if (status == 2)
         {// B
             File.Delete($"{path}version.dll");
             File.Copy($"{path}.bepinex/winhttp.dll", $"{path}winhttp.dll", true);
-            Process.Start($"{path}/PlantsVsZombiesRH.exe");
+            Process.Start($"{path}PlantsVsZombiesRH.exe");
         }
         if(status == 3)
         {// M
             File.Delete($"{path}winhttp.dll");
             File.Copy($"{path}.melonloader/version.dll", $"{path}version.dll", true);
-            Process.Start($"{path}/PlantsVsZombiesRH.exe");
+            Process.Start($"{path}PlantsVsZombiesRH.exe");
         }
     }
 
     public void RemoveGame(int index,bool force = false)
     {
-        if (index != -1)
+        if (index != -1 && index<GamesNum)
         {
             if (force)
             {
                 var folderPath = Games[index].path;
-                //MessageBox.Show(folderPath);
                 if (Directory.Exists(folderPath))
                 {
                     Directory.Delete(folderPath, recursive: true);
