@@ -23,3 +23,29 @@ public class DownloadData
         this.path = path;
     }
 }
+
+public enum ModType
+{
+    BepInEx,
+    MelonLoader
+}
+public class ModData
+{
+    public string name = "";
+    public ModType type;
+    public string[] links = new string[8];
+    public string motd = "";
+    public string rhversion = "";
+    public string version = "";
+    public string author = "";
+    public ModData(string name,ModType type,string[] links,string motd,string rhversion,string version,string author)
+    {
+        this.name = name;
+        this.type = type;
+        this.links = links;
+        this.motd = motd;
+        this.rhversion = rhversion;
+        this.version = version;
+        this.author = author;
+    }
+}
