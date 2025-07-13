@@ -7,8 +7,9 @@ namespace HRHL;
 
 public class GameDatas
 {
-    public int GamesNum = 0;
-    public GameData[] Games = new GameData[64];
+    public string version = "0.1.0";
+    //public GameData[] Games = new GameData[64];
+    public List<GameData> Games = new List<GameData>();
 
     public void ReadData()
     {
@@ -17,15 +18,15 @@ public class GameDatas
         {
             MessageBox.Show($"文件 {filePath} 不存在，无法读取数据。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             //Environment.Exit(1);
-            GamesNum = 0;
             return;
         }
         string jsonData = File.ReadAllText(filePath);
-        var data = JsonConvert.DeserializeObject<dynamic>(jsonData);
-        GamesNum = data.GamesNum;
-        for (int i = 0; i < GamesNum; i++)
+        var data = JsonConvert.DeserializeObject<List<GameData>>(jsonData);
+        Games.Clear();
+        for (int i = 0; i < data.Count; i++)
         {
-            Games[i] = new GameData((string)data.Games[i].name, (string)data.Games[i].path);
+            Games.Add(new GameData(data[i].name, data[i].path));
+            //Games[i] = new GameData((string)data.Games[i].name, (string)data.Games[i].path);
         }
     }
     private bool IsValidGame(string path)
@@ -52,7 +53,7 @@ public class GameDatas
 
 
         string[] subFolders = Directory.GetDirectories(@"./.rh", "*", SearchOption.TopDirectoryOnly);
-        GamesNum=0;
+        Games.Clear();
         foreach (var fld in subFolders)
         {
             string name = fld.Split(@"\")[1];
@@ -68,8 +69,8 @@ public class GameDatas
                         name = line.Trim();
                     }
                 }
-                Games[GamesNum] = new GameData(name, fld);
-                GamesNum++;
+                Games.Add(new GameData(name, fld));
+                //GamesNum++;
             }
         }
         return;
@@ -77,8 +78,8 @@ public class GameDatas
         
         var gamedatas = new
         {
-            GamesNum = GamesNum,
-            Games = Games.Take(GamesNum).Select(g => new { g.name, g.path }).ToArray()
+            GamesNum = Games.Count,
+            Games = Games.Take(Games.Count).Select(g => new { g.name, g.path }).ToArray()
         };
         string jsonData = JsonConvert.SerializeObject(gamedatas, Formatting.Indented);
         File.WriteAllText(gamedatasPath, jsonData);
@@ -91,12 +92,7 @@ public class GameDatas
             MessageBox.Show($"文件 {gamedatasPath} 不存在，无法写入数据。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             Environment.Exit(1);
         }
-        var gamedatas = new
-        {
-            GamesNum = GamesNum,
-            Games = Games.Take(GamesNum).Select(g => new { g.name, g.path }).ToArray()
-        };
-        string jsonData = JsonConvert.SerializeObject(gamedatas, Formatting.Indented);
+        string jsonData = JsonConvert.SerializeObject(Games, Formatting.Indented);
         File.WriteAllText(gamedatasPath, jsonData);
     }
     public void StartGame(int status,string path)
@@ -128,7 +124,7 @@ public class GameDatas
 
     public void RemoveGame(int index,bool force = false)
     {
-        if (index != -1 && index<GamesNum)
+        if (index != -1 && index<Games.Count)
         {
             if (force)
             {
@@ -138,10 +134,7 @@ public class GameDatas
                     Directory.Delete(folderPath, recursive: true);
                 }
             }
-            var gamesList = Games.ToList();
-            gamesList.RemoveAt(index);
-            Games = gamesList.ToArray();
-            GamesNum--;
+            Games.RemoveAt(index);
             WriteData();
         }
         else

@@ -6,8 +6,9 @@ namespace HRHL;
 
 public class DownloadDatas
 {
-    public int DownloadNum = 0;
-    public DownloadData[] Downloads = new DownloadData[64];
+    //public int DownloadNum = 0;
+    //public DownloadData[] Downloads = new DownloadData[64];
+    public List<DownloadData> Downloads = new List<DownloadData>();
 
     public void ReadData()
     {
@@ -18,15 +19,15 @@ public class DownloadDatas
             Environment.Exit(1);
         }
         string jsonData = File.ReadAllText(filePath);
-        var data = JsonConvert.DeserializeObject<dynamic>(jsonData);
-        DownloadNum = data.DownloadNum;
-        for (int i = 0; i < DownloadNum; i++)
+        var data = JsonConvert.DeserializeObject<List<DownloadData>>(jsonData);
+        Downloads.Clear();
+        for (int i = 0; i < data.Count; i++)
         {
-            Downloads[i] = new DownloadData(
-                (string)data.Downloads[i].name,
-                data.Downloads[i].links.ToObject<string[]>(),
-                (string)data.Downloads[i].path
-            );
+            Downloads.Add(new DownloadData(
+                data[i].name,
+                data[i].links,
+                data[i].path
+            ));
         }
     }
 

@@ -1,12 +1,8 @@
-﻿using Newtonsoft.Json;
-using System.Data;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Xml.Schema;
-using Microsoft.Win32;
 
 namespace HRHL
 {
@@ -40,11 +36,11 @@ namespace HRHL
             downloadDatas.ReadData();
             HasReaded = true;
             // 添加游戏项
-            for (int i = 0; i < gameDatas.GamesNum; i++)
+            for (int i = 0; i < gameDatas.Games.Count; i++)
             {
                 AddGridItem(i);
             }
-            if (gameDatas.GamesNum == 0)
+            if (gameDatas.Games.Count == 0)
             {
                 var label = new Label
                 {
@@ -99,7 +95,7 @@ namespace HRHL
             MainStackPanel.Children.Add(GameFreshStackPanel); 
             // 添加下载项
             DownloadGrid.Children.Clear();
-            for (int i = 0; i < downloadDatas.DownloadNum; i++)
+            for (int i = 0; i < downloadDatas.Downloads.Count; i++)
             {
                 AddDownloadGridItem(i);
             }
@@ -307,6 +303,7 @@ namespace HRHL
             CurrentGameName = $"{gameDatas.Games[index].name}";
             GameNameText.Text = $"{gameDatas.Games[index].name}";
             GamePathText.Text = $"{gameDatas.Games[index].path.Replace("./.rh/","").Replace("./.rh\\","").Replace("\\","").Replace("/","")}";
+            
         }
 
       
@@ -407,7 +404,7 @@ namespace HRHL
             string newName = GameNameText.Text;
             if (!string.IsNullOrEmpty(newName))
             {
-                if (CurrentGameIndex != -1 && CurrentGameIndex<gameDatas.GamesNum)
+                if (CurrentGameIndex != -1 && CurrentGameIndex<gameDatas.Games.Count)
                 {
                     gameDatas.Games[CurrentGameIndex].name = newName;
                     File.WriteAllText($"{gameDatas.Games[CurrentGameIndex].path}/.name", newName);
@@ -443,7 +440,8 @@ namespace HRHL
             {
                 if (CurrentGameIndex != -1)
                 {
-                    if (newPath == gameDatas.Games[CurrentGameIndex].path)
+                    MessageBox.Show($"{newPath}\n{gameDatas.Games[CurrentGameIndex].path}");
+                    if ($"./.rh/{newPath}".Replace("\\","").Replace("/","") == gameDatas.Games[CurrentGameIndex].path.Replace("\\","").Replace("/",""))
                     {
                         return;
                     }

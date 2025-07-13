@@ -95,8 +95,7 @@ namespace HRHL
 
                 //删除
                 File.Delete($"{startupPath}{path}/.game.zip");
-                MainWindow.gameDatas.Games[MainWindow.gameDatas.GamesNum] = new GameData(name, $"{path}");
-                MainWindow.gameDatas.GamesNum++;
+                MainWindow.gameDatas.Games.Add(new GameData(name, $"{path}"));
 
                 //写入数据
                 File.WriteAllText($"{startupPath}{path}/.name", name);
