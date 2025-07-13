@@ -476,5 +476,10 @@ namespace HRHL
         {
             throw new NotImplementedException();
         }
+
+        private void GameMgr_OnClickMgr_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
