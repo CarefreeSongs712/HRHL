@@ -126,7 +126,7 @@ namespace HRHL
             DownloadModsView.Visibility = Visibility.Collapsed;
             SettingsView.Visibility = Visibility.Collapsed;
 
-            Button clickedButton = sender as Button;
+            Button? clickedButton = sender as Button;
 
             // 设置选中样式
             if (clickedButton != null)
@@ -465,21 +465,6 @@ namespace HRHL
         {
             //MessageBox.Show($"./.rh/{GamePathText.Text}/");
             Process.Start($"explorer.exe",Path.GetDirectoryName($"./.rh/{GamePathText.Text}/"));
-        }
-
-        private void BepInExModMgr_Click(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void MelonModMgr_Click(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void GameMgr_OnClickMgr_Click(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
         }
     }
 }

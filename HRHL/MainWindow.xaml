@@ -116,38 +116,6 @@
                                 Padding="10,0"
                                 Click="OpenGamePath_Click"></Button>
                     </StackPanel>
-                    <Label Content="模组管理：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="18" Margin="20,10,0,0"></Label>
-                    <Border Padding="10" Margin="10" MinHeight="300">
-                        <StackPanel Orientation="Horizontal" > <!-- 下 -->
-                            <StackPanel MaxWidth="60"> <!-- 右 -->
-                                <Button x:Name="GameMgr" Content="基础设置" 
-                                        Background="Khaki"
-                                        Foreground="Black"
-                                        Margin="0,10"
-                                        Padding="5,10"
-                                        Click="GameMgr_OnClickMgr_Click"></Button>
-                                <Button x:Name="BepInExModMgr" Content="BepInEx" 
-                                        Background="Khaki"
-                                        Foreground="Black"
-                                        Margin="0,10"
-                                        Padding="5,10"
-                                        Click="BepInExModMgr_Click"></Button>
-                                <Button x:Name="MelonModMgr" Content="Melon" 
-                                        Background="Khaki"
-                                        Foreground="Black"
-                                        Margin="0,10"
-                                        Padding="5,10"
-                                        Click="MelonModMgr_Click"></Button>
-                            </StackPanel>
-                            <StackPanel> <!-- 左 -->
-                                <ScrollViewer x:Name="ModsView" Visibility="Collapsed">
-                                    
-                                </ScrollViewer>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                    
-                    
                 </StackPanel>
             </ScrollViewer>
             <!-- 下载界面 -->
